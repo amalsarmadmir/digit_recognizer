@@ -5,6 +5,11 @@ from tensorflow.keras.models import load_model
 from PIL import Image
 import io
 import logging
+import os
+
+port = int(os.environ.get("PORT", 8080))  # Railway sets this PORT automatically
+app.run(host="0.0.0.0", port=port)
+
 
 app = Flask(__name__)
 
