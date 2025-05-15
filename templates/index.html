@@ -1,1 +1,129 @@
-lalal
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MNIST Digit Predictor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .upload-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .result-section {
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+        #preview {
+            max-width: 200px;
+            margin: 20px auto;
+            display: none;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        #confidence {
+            color: #666;
+            font-size: 16px;
+        }
+        .error {
+            color: #ff0000;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MNIST Digit Predictor</h1>
+        
+        <div class="upload-section">
+            <input type="file" id="imageInput" accept="image/*" style="display: none;">
+            <button class="button" onclick="document.getElementById('imageInput').click()">
+                Choose Image
+            </button>
+            <p>Supported formats: PNG, JPG, JPEG</p>
+        </div>
+
+        <img id="preview" alt="Preview">
+        
+        <div class="result-section" id="resultSection">
+            <div id="result"></div>
+            <div id="confidence"></div>
+        </div>
+    </div>
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const preview = document.getElementById('preview');
+        const resultSection = document.getElementById('resultSection');
+        const resultDiv = document.getElementById('result');
+        const confidenceDiv = document.getElementById('confidence');
+
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Show preview
+                preview.style.display = 'block';
+                preview.src = URL.createObjectURL(file);
+
+                // Create form data and send to server
+                const formData = new FormData();
+                formData.append('file', file);
+
+                fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    resultSection.style.display = 'block';
+                    if (data.error) {
+                        resultDiv.innerHTML = `Error: ${data.error}`;
+                        confidenceDiv.innerHTML = '';
+                    } else {
+                        resultDiv.innerHTML = `Predicted Digit: ${data.prediction}`;
+                        confidenceDiv.innerHTML = `Confidence: ${data.confidence}%`;
+                    }
+                })
+                .catch(error => {
+                    resultSection.style.display = 'block';
+                    resultDiv.innerHTML = 'Error: Failed to process image';
+                    confidenceDiv.innerHTML = '';
+                });
+            }
+        });
+    </script>
+</body>
+</html> 
